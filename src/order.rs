@@ -1,6 +1,6 @@
 use std::{collections::BinaryHeap, cmp::Reverse, error::Error};
 
-#[derive(Eq, PartialEq)]
+#[derive(Debug, Eq, PartialEq)]
 pub enum OrderType {
     Buy,
     Sell,
@@ -94,5 +94,65 @@ impl Trade {
             self.buy_id,
             self.sell_id
         )
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_order_parse_input_valid_buy() {
+        let input = "1: Buy 10 BTC @ 120 USD";
+        let order = Order::parse_input(input).unwrap().unwrap();
+
+        assert_eq!(order.id, 1);
+        assert_eq!(order.order_type, OrderType::Buy);
+        assert_eq!(order.quantity, 10);
+        assert_eq!(order.price, 120);
+    }
+
+    #[test]
+    fn test_order_parse_input_valid_sell() {
+        let input = "2: Sell 5 BTC @ 100 USD";
+        let order = Order::parse_input(input).unwrap().unwrap();
+
+        assert_eq!(order.id, 2);
+        assert_eq!(order.order_type, OrderType::Sell);
+        assert_eq!(order.quantity, 5);
+        assert_eq!(order.price, 100);
+    }
+
+    #[test]
+    fn test_order_parse_input_invalid() {
+        let input = "Invalid input string";
+        let order = Order::parse_input(input).unwrap();
+        assert!(order.is_none());
+    }
+
+    #[test]
+    fn test_order_book_push_and_pop() {
+        let mut order_book = OrderBook::new();
+        let order1 = Order { id: 1, order_type: OrderType::Buy, price: 120, quantity: 10 };
+        let order2 = Order { id: 2, order_type: OrderType::Sell, price: 100, quantity: 5 };
+
+        order_book.push(order1);
+        order_book.push(order2);
+
+        let popped_order = order_book.pop().unwrap();
+        assert_eq!(popped_order.id, 2);
+        assert_eq!(popped_order.price, 100);
+    }
+
+    #[test]
+    fn test_trade_make_trade() {
+        let buy_order = Order { id: 1, order_type: OrderType::Buy, price: 120, quantity: 10 };
+        let sell_order = Order { id: 2, order_type: OrderType::Sell, price: 100, quantity: 5 };
+        let trade = Trade { buy_id: 1, sell_id: 2, price: 100, quantity_traded: 5 };
+
+        let (updated_buy_order, updated_sell_order) = trade.make_trade(buy_order, sell_order);
+
+        assert_eq!(updated_buy_order.quantity, 5);
+        assert_eq!(updated_sell_order.quantity, 0);
     }
 }

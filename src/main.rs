@@ -30,7 +30,7 @@ fn main() {
                                             price: popped_sell_order.price,
                                             quantity_traded: min(
                                                 parsed_order.quantity,
-                                                 popped_sell_order.quantity
+                                                popped_sell_order.quantity
                                             ),
                                         };
                                         
